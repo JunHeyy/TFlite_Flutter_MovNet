@@ -18,10 +18,10 @@ class CameraView extends StatefulWidget {
   final Function(List<Recognition> recognitions) resultsCallback;
 
   /// Callback to inference stats to [HomeView]
-  final Function(Stats stats) statsCallback;
+  // final Function(Stats stats) statsCallback;
 
   /// Constructor
-  const CameraView(this.resultsCallback, this.statsCallback);
+  const CameraView(this.resultsCallback);
   @override
   _CameraViewState createState() => _CameraViewState();
 }
@@ -151,8 +151,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       widget.resultsCallback(inferenceResults["recognitions"]);
 
       // pass stats to HomeView
-      widget.statsCallback((inferenceResults["stats"] as Stats)
-        ..totalElapsedTime = uiThreadInferenceElapsedTime);
+      // widget.statsCallback((inferenceResults["stats"] as Stats)
+      //   ..totalElapsedTime = uiThreadInferenceElapsedTime);
 
       // set predicting to false to allow new frames
       setState(() {
