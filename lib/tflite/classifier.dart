@@ -52,10 +52,18 @@ class Classifier {
   /// Loads interpreter from asset
   void loadModel({Interpreter interpreter}) async {
     try {
+      GpuDelegate gpuDelegate = GpuDelegate(
+          options: GpuDelegateOptions(
+              allowPrecisionLoss: true,
+              waitType: TFLGpuDelegateWaitType.active));
+
+      // Buffer
+      InterpreterOptions interpreterOptions = InterpreterOptions()
+        ..addDelegate(gpuDelegate);
       _interpreter = interpreter ??
           await Interpreter.fromAsset(
             MODEL_FILE_NAME,
-            options: InterpreterOptions()..threads = 4,
+            options: interpreterOptions,
           );
 
       var outputTensors = _interpreter.getOutputTensors();
