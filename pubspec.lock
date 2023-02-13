@@ -433,10 +433,10 @@ packages:
     dependency: "direct main"
     description:
       name: tflite_flutter_helper
-      sha256: acda0ca6d9ff36051cd45d32e0f6e4979c9d37d5b599d1f1a2900c14c708ed55
+      sha256: "0d57cce7622826cf11ec602b345ea34fae0da30c8982f973e2037d6245a605d7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.1"
+    version: "0.3.1"
   tuple:
     dependency: transitive
     description:
