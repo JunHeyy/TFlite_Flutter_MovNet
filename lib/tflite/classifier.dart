@@ -45,6 +45,7 @@ class Classifier {
     Interpreter interpreter,
     List<String> labels,
   }) {
+    _interpreter = interpreter;
     loadModel(interpreter: interpreter);
     loadLabels(labels: labels);
   }
@@ -52,19 +53,20 @@ class Classifier {
   /// Loads interpreter from asset
   void loadModel({Interpreter interpreter}) async {
     try {
-      GpuDelegate gpuDelegate = GpuDelegate(
-          options: GpuDelegateOptions(
-              allowPrecisionLoss: true,
-              waitType: TFLGpuDelegateWaitType.active));
+      // GpuDelegate gpuDelegate = GpuDelegate(
+      //     options: GpuDelegateOptions(
+      //         allowPrecisionLoss: true,
+      //         waitType: TFLGpuDelegateWaitType.active));
 
-      // Buffer
-      InterpreterOptions interpreterOptions = InterpreterOptions()
-        ..addDelegate(gpuDelegate);
-      _interpreter = interpreter ??
-          await Interpreter.fromAsset(
-            MODEL_FILE_NAME,
-            options: interpreterOptions,
-          );
+      // // Buffer
+      // InterpreterOptions interpreterOptions = InterpreterOptions()
+      //   ..addDelegate(gpuDelegate);
+      // _interpreter = interpreter ??
+      //     await Interpreter.fromAsset(
+      //       MODEL_FILE_NAME,
+      //       options: interpreterOptions,
+      //     );
+      // _interpreter = this.interpreter;
 
       var outputTensors = _interpreter.getOutputTensors();
       _outputShapes = [];

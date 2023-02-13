@@ -3,11 +3,14 @@ import 'dart:isolate';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:object_detection/tflite/classifier.dart';
 import 'package:object_detection/tflite/recognition.dart';
 import 'package:object_detection/tflite/stats.dart';
 import 'package:object_detection/ui/camera_view_singleton.dart';
 import 'package:object_detection/utils/isolate_utils.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
 
 /// [CameraView] sends each frame for inference
 class CameraView extends StatefulWidget {
@@ -36,6 +39,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   /// Instance of [Classifier]
   Classifier classifier;
 
+  Interpreter interpreter;
+
   /// Instance of [IsolateUtils]
   IsolateUtils isolateUtils;
 
@@ -48,15 +53,27 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   void initStateAsync() async {
     WidgetsBinding.instance.addObserver(this);
 
+    // Create an instance of classifier to load model and labels
+    final dataFile = await getFile('assets/detect.tflite');
+    GpuDelegate gpuDelegate = GpuDelegate(
+        options: GpuDelegateOptions(
+            allowPrecisionLoss: false,
+            waitType: TFLGpuDelegateWaitType.doNotWait,
+            enableQuantization: false));
+
+    // Buffer
+    InterpreterOptions interpreterOptions = InterpreterOptions()
+      ..addDelegate(gpuDelegate)
+      ..threads = 6;
+    interpreter = Interpreter.fromFile(dataFile, options: interpreterOptions);
+    classifier = Classifier(interpreter: interpreter);
+
     // Spawn a new isolate
     isolateUtils = IsolateUtils();
     await isolateUtils.start();
 
     // Camera initialization
     initializeCamera();
-
-    // Create an instance of classifier to load model and labels
-    classifier = Classifier();
 
     // Initially predicting = false
     predicting = false;
@@ -104,7 +121,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   /// Callback to receive each frame [CameraImage] perform inference on it
   onLatestImageAvailable(CameraImage cameraImage) async {
-    if (classifier.interpreter != null && classifier.labels != null) {
+    if (interpreter != null && classifier.labels != null) {
       // If previous inference has not completed then return
       if (predicting) {
         return;
@@ -117,8 +134,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       var uiThreadTimeStart = DateTime.now().millisecondsSinceEpoch;
 
       // Data to be passed to inference isolate
-      var isolateData = IsolateData(
-          cameraImage, classifier.interpreter.address, classifier.labels);
+      var isolateData =
+          IsolateData(cameraImage, interpreter.address, classifier.labels);
 
       // We could have simply used the compute method as well however
       // it would be as in-efficient as we need to continuously passing data
@@ -174,4 +191,15 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     cameraController.dispose();
     super.dispose();
   }
+}
+
+Future<File> getFile(String fileName) async {
+  final appDir = await getTemporaryDirectory();
+  final appPath = appDir.path;
+  final fileOnDevice = File('$appPath/$fileName');
+  await fileOnDevice.parent.create(recursive: true);
+  final rawAssetFile = await rootBundle.load(fileName);
+  final rawBytes = rawAssetFile.buffer.asUint8List();
+  await fileOnDevice.writeAsBytes(rawBytes, flush: true);
+  return fileOnDevice;
 }
