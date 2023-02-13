@@ -12,10 +12,10 @@ import 'stats.dart';
 /// Classifier
 class Classifier {
   /// Instance of Interpreter
-  Interpreter _interpreter;
+  late Interpreter _interpreter;
 
   /// Labels file loaded as list
-  List<String> _labels;
+  List<String>? _labels;
 
   static const String MODEL_FILE_NAME = "detect.tflite";
   static const String LABEL_FILE_NAME = "labelmap.txt";
@@ -27,23 +27,23 @@ class Classifier {
   static const double THRESHOLD = 0.5;
 
   /// [ImageProcessor] used to pre-process the image
-  ImageProcessor imageProcessor;
+  ImageProcessor? imageProcessor;
 
   /// Padding the image to transform into square
-  int padSize;
+  late int padSize;
 
   /// Shapes of output tensors
-  List<List<int>> _outputShapes;
+  late List<List<int>> _outputShapes;
 
   /// Types of output tensors
-  List<TfLiteType> _outputTypes;
+  late List<TfLiteType> _outputTypes;
 
   /// Number of results to show
   static const int NUM_RESULTS = 10;
 
   Classifier({
-    Interpreter interpreter,
-    List<String> labels,
+    required Interpreter interpreter,
+    required List<String> labels,
   }) {
     _interpreter = interpreter;
     loadModel(interpreter: interpreter);
@@ -51,7 +51,7 @@ class Classifier {
   }
 
   /// Loads interpreter from asset
-  void loadModel({Interpreter interpreter}) async {
+  void loadModel({required Interpreter interpreter}) async {
     try {
       // GpuDelegate gpuDelegate = GpuDelegate(
       //     options: GpuDelegateOptions(
@@ -81,7 +81,7 @@ class Classifier {
   }
 
   /// Loads labels from assets
-  void loadLabels({List<String> labels}) async {
+  void loadLabels({required List<String> labels}) async {
     try {
       _labels =
           labels ?? await FileUtil.loadLabels("assets/" + LABEL_FILE_NAME);
@@ -99,12 +99,12 @@ class Classifier {
           .add(ResizeOp(INPUT_SIZE, INPUT_SIZE, ResizeMethod.BILINEAR))
           .build();
     }
-    inputImage = imageProcessor.process(inputImage);
+    inputImage = imageProcessor!.process(inputImage);
     return inputImage;
   }
 
   /// Runs object detection on the input image
-  Map<String, dynamic> predict(imageLib.Image image) {
+  Map<String, dynamic>? predict(imageLib.Image image) {
     var predictStartTime = DateTime.now().millisecondsSinceEpoch;
 
     if (_interpreter == null) {
@@ -174,17 +174,17 @@ class Classifier {
 
       // Label string
       var labelIndex = outputClasses.getIntValue(i) + labelOffset;
-      var label = _labels.elementAt(labelIndex);
+      var label = "toilet";
 
       if (score > THRESHOLD) {
         // inverse of rect
         // [locations] corresponds to the image size 300 X 300
         // inverseTransformRect transforms it our [inputImage]
-        Rect transformedRect = imageProcessor.inverseTransformRect(
-            locations[i], image.height, image.width);
+        Rect transformedRect = imageProcessor!
+            .inverseTransformRect(locations[i], image.height, image.width);
 
         recognitions.add(
-          Recognition(i, label, score, transformedRect),
+          Recognition(i, label!, score, transformedRect),
         );
       }
     }
@@ -197,7 +197,8 @@ class Classifier {
       "stats": Stats(
           totalPredictTime: predictElapsedTime,
           inferenceTime: inferenceTimeElapsed,
-          preProcessingTime: preProcessElapsedTime)
+          preProcessingTime: preProcessElapsedTime,
+          totalElapsedTime: 10)
     };
   }
 
@@ -205,5 +206,5 @@ class Classifier {
   Interpreter get interpreter => _interpreter;
 
   /// Gets the loaded labels
-  List<String> get labels => _labels;
+  List<String> get labels => _labels!;
 }

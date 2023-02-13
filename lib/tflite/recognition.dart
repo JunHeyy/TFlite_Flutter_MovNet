@@ -18,7 +18,7 @@ class Recognition {
   ///
   /// The rectangle corresponds to the raw input image
   /// passed for inference
-  Rect _location;
+  Rect? _location;
 
   Recognition(this._id, this._label, this._score, [this._location]);
 
@@ -28,7 +28,7 @@ class Recognition {
 
   double get score => _score;
 
-  Rect get location => _location;
+  Rect? get location => _location;
 
   /// Returns bounding box rectangle corresponding to the
   /// displayed image on screen
@@ -42,12 +42,12 @@ class Recognition {
     double ratioX = CameraViewSingleton.ratio;
     double ratioY = ratioX;
 
-    double transLeft = max(0.1, location.left * ratioX);
-    double transTop = max(0.1, location.top * ratioY);
+    double transLeft = max(0.1, location!.left * ratioX);
+    double transTop = max(0.1, location!.top * ratioY);
     double transWidth = min(
-        location.width * ratioX, CameraViewSingleton.actualPreviewSize.width);
-    double transHeight = min(
-        location.height * ratioY, CameraViewSingleton.actualPreviewSize.height);
+        location!.width * ratioX, CameraViewSingleton.actualPreviewSize.width);
+    double transHeight = min(location!.height * ratioY,
+        CameraViewSingleton.actualPreviewSize.height);
 
     Rect transformedRect =
         Rect.fromLTWH(transLeft, transTop, transWidth, transHeight);

@@ -15,10 +15,10 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   /// Results to draw bounding boxes
-  List<Recognition> results;
+  List<Recognition>? results;
 
   /// Realtime stats
-  Stats stats;
+  Stats? stats;
 
   /// Scaffold Key
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
@@ -79,11 +79,11 @@ class _HomeViewState extends State<HomeView> {
                                 child: Column(
                                   children: [
                                     StatsRow('Inference time:',
-                                        '${stats.inferenceTime} ms'),
+                                        '${stats?.inferenceTime} ms'),
                                     StatsRow('Total prediction time:',
-                                        '${stats.totalElapsedTime} ms'),
+                                        '${stats?.totalElapsedTime} ms'),
                                     StatsRow('Pre-processing time:',
-                                        '${stats.preProcessingTime} ms'),
+                                        '${stats?.preProcessingTime} ms'),
                                     StatsRow('Frame',
                                         '${CameraViewSingleton.inputImageSize?.width} X ${CameraViewSingleton.inputImageSize?.height}'),
                                   ],
@@ -103,7 +103,7 @@ class _HomeViewState extends State<HomeView> {
   }
 
   /// Returns Stack of bounding boxes
-  Widget boundingBoxes(List<Recognition> results) {
+  Widget boundingBoxes(List<Recognition>? results) {
     if (results == null) {
       return Container();
     }
@@ -124,10 +124,12 @@ class _HomeViewState extends State<HomeView> {
   }
 
   /// Callback to get inference stats from [CameraView]
-  void statsCallback(Stats stats) {
-    setState(() {
-      this.stats = stats;
-    });
+  void statsCallback(Stats? stats) {
+    if (stats != null) {
+      setState(() {
+        this.stats = stats;
+      });
+    }
   }
 
   static const BOTTOM_SHEET_RADIUS = Radius.circular(24.0);
