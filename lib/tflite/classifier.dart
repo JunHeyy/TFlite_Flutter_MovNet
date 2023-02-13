@@ -15,7 +15,7 @@ class Classifier {
   late Interpreter _interpreter;
 
   /// Labels file loaded as list
-  List<String>? _labels;
+  // List<String>? _labels;
 
   static const String MODEL_FILE_NAME = "detect.tflite";
   static const String LABEL_FILE_NAME = "labelmap.txt";
@@ -43,11 +43,9 @@ class Classifier {
 
   Classifier({
     required Interpreter interpreter,
-    required List<String> labels,
   }) {
     _interpreter = interpreter;
     loadModel(interpreter: interpreter);
-    loadLabels(labels: labels);
   }
 
   /// Loads interpreter from asset
@@ -81,14 +79,14 @@ class Classifier {
   }
 
   /// Loads labels from assets
-  void loadLabels({required List<String> labels}) async {
-    try {
-      _labels =
-          labels ?? await FileUtil.loadLabels("assets/" + LABEL_FILE_NAME);
-    } catch (e) {
-      print("Error while loading labels: $e");
-    }
-  }
+  // void loadLabels({required List<String> labels}) async {
+  //   try {
+  //     _labels =
+  //         labels ?? await FileUtil.loadLabels("assets/" + LABEL_FILE_NAME);
+  //   } catch (e) {
+  //     print("Error while loading labels: $e");
+  //   }
+  // }
 
   /// Pre-process the image
   TensorImage getProcessedImage(TensorImage inputImage) {
@@ -192,6 +190,8 @@ class Classifier {
     var predictElapsedTime =
         DateTime.now().millisecondsSinceEpoch - predictStartTime;
 
+    // print('Inference time $predictElapsedTime');
+
     return {
       "recognitions": recognitions,
       "stats": Stats(
@@ -206,5 +206,5 @@ class Classifier {
   Interpreter get interpreter => _interpreter;
 
   /// Gets the loaded labels
-  List<String> get labels => _labels!;
+  // List<String> get labels => _labels!;
 }

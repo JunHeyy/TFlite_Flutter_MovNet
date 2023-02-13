@@ -35,8 +35,7 @@ class IsolateUtils {
       if (isolateData != null) {
         Classifier classifier = Classifier(
             interpreter:
-                Interpreter.fromAddress(isolateData.interpreterAddress),
-            labels: isolateData.labels);
+                Interpreter.fromAddress(isolateData.interpreterAddress));
         imageLib.Image? image =
             ImageUtils.convertCameraImage(isolateData.cameraImage);
         if (Platform.isAndroid) {
@@ -53,12 +52,11 @@ class IsolateUtils {
 class IsolateData {
   CameraImage cameraImage;
   int interpreterAddress;
-  List<String> labels;
+
   late SendPort responsePort;
 
   IsolateData(
     this.cameraImage,
     this.interpreterAddress,
-    this.labels,
   );
 }
