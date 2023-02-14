@@ -34,7 +34,7 @@ class _HomeViewState extends State<HomeView> {
           CameraView(resultsCallback),
 
           // Bounding boxes
-          boundingBoxes(results),
+          // boundingBoxes(results),
 
           // Heading
           Align(
@@ -103,18 +103,18 @@ class _HomeViewState extends State<HomeView> {
   }
 
   /// Returns Stack of bounding boxes
-  Widget boundingBoxes(List<Recognition>? results) {
-    if (results == null) {
-      return Container();
-    }
-    return Stack(
-      children: results
-          .map((e) => BoxWidget(
-                result: e,
-              ))
-          .toList(),
-    );
-  }
+  // Widget boundingBoxes(List<Recognition>? results) {
+  //   if (results == null) {
+  //     return Container();
+  //   }
+  //   return Stack(
+  //     children: results
+  //         .map((e) => BoxWidget(
+  //               result: e,
+  //             ))
+  //         .toList(),
+  //   );
+  // }
 
   /// Callback to get inference results from [CameraView]
   void resultsCallback(List<Recognition> results) {
@@ -124,34 +124,34 @@ class _HomeViewState extends State<HomeView> {
   }
 
   /// Callback to get inference stats from [CameraView]
-  void statsCallback(Stats? stats) {
-    if (stats != null) {
-      setState(() {
-        this.stats = stats;
-      });
-    }
-  }
+  // void statsCallback(Stats? stats) {
+  //   if (stats != null) {
+  //     setState(() {
+  //       this.stats = stats;
+  //     });
+  //   }
+  // }
 
-  static const BOTTOM_SHEET_RADIUS = Radius.circular(24.0);
-  static const BORDER_RADIUS_BOTTOM_SHEET = BorderRadius.only(
-      topLeft: BOTTOM_SHEET_RADIUS, topRight: BOTTOM_SHEET_RADIUS);
+  // static const BOTTOM_SHEET_RADIUS = Radius.circular(24.0);
+  // static const BORDER_RADIUS_BOTTOM_SHEET = BorderRadius.only(
+  //     topLeft: BOTTOM_SHEET_RADIUS, topRight: BOTTOM_SHEET_RADIUS);
 }
 
 /// Row for one Stats field
-class StatsRow extends StatelessWidget {
-  final String left;
-  final String right;
+// class StatsRow extends StatelessWidget {
+//   final String left;
+//   final String right;
 
-  StatsRow(this.left, this.right);
+//   StatsRow(this.left, this.right);
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(left), Text(right)],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.only(bottom: 8.0),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [Text(left), Text(right)],
+//       ),
+//     );
+//   }
+// }

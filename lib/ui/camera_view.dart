@@ -27,6 +27,8 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
+  static const String MODEL_FILE_NAME = "assets/movenetthunder.tflite";
+
   /// List of available cameras
   late List<CameraDescription> cameras;
 
@@ -54,20 +56,18 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     // Create an instance of classifier to load model and labels
-    final dataFile = await getFile('assets/detect.tflite');
+    final dataFile = await getFile(MODEL_FILE_NAME);
     if (Platform.isIOS) {
       GpuDelegate gpuDelegate = GpuDelegate(
           options: GpuDelegateOptions(
-              allowPrecisionLoss: false,
-              waitType: TFLGpuDelegateWaitType.doNotWait,
-              enableQuantization: false));
+              allowPrecisionLoss: true,
+              waitType: TFLGpuDelegateWaitType.active));
 
       // Buffer
       InterpreterOptions interpreterOptions = InterpreterOptions()
-        ..addDelegate(gpuDelegate)
+        // ..addDelegate(gpuDelegate)
         ..threads = 6;
       interpreter = Interpreter.fromFile(dataFile, options: interpreterOptions);
-      classifier = Classifier(interpreter: interpreter);
     } else {
       interpreter = Interpreter.fromFile(dataFile,
           options: InterpreterOptions()..threads = 6);
@@ -150,6 +150,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
       var uiThreadInferenceElapsedTime =
           DateTime.now().millisecondsSinceEpoch - uiThreadTimeStart;
+
+      print('Inference time $uiThreadInferenceElapsedTime');
 
       // pass results to HomeView
       widget.resultsCallback(inferenceResults["recognitions"]);

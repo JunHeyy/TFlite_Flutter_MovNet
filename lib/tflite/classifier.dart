@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as imageLib;
 import 'package:object_detection/tflite/recognition.dart';
@@ -14,17 +13,11 @@ class Classifier {
   /// Instance of Interpreter
   late Interpreter _interpreter;
 
-  /// Labels file loaded as list
-  // List<String>? _labels;
-
-  static const String MODEL_FILE_NAME = "detect.tflite";
-  static const String LABEL_FILE_NAME = "labelmap.txt";
-
   /// Input size of image (height = width = 300)
-  static const int INPUT_SIZE = 300;
+  static const int INPUT_SIZE = 256;
 
   /// Result score threshold
-  static const double THRESHOLD = 0.5;
+  static const double THRESHOLD = 0.25;
 
   /// [ImageProcessor] used to pre-process the image
   ImageProcessor? imageProcessor;
@@ -51,6 +44,7 @@ class Classifier {
   /// Loads interpreter from asset
   void loadModel({required Interpreter interpreter}) async {
     try {
+      ///  The following code is Commented out as intepreter is created in camera view instead.
       // GpuDelegate gpuDelegate = GpuDelegate(
       //     options: GpuDelegateOptions(
       //         allowPrecisionLoss: true,
@@ -78,16 +72,6 @@ class Classifier {
     }
   }
 
-  /// Loads labels from assets
-  // void loadLabels({required List<String> labels}) async {
-  //   try {
-  //     _labels =
-  //         labels ?? await FileUtil.loadLabels("assets/" + LABEL_FILE_NAME);
-  //   } catch (e) {
-  //     print("Error while loading labels: $e");
-  //   }
-  // }
-
   /// Pre-process the image
   TensorImage getProcessedImage(TensorImage inputImage) {
     padSize = max(inputImage.height, inputImage.width);
@@ -101,6 +85,52 @@ class Classifier {
     return inputImage;
   }
 
+  void predictMovNet(imageLib.Image image) {
+    var predictStartTime = DateTime.now().millisecondsSinceEpoch;
+
+    if (_interpreter == null) {
+      print("Interpreter not initialized");
+      return null;
+    }
+
+    var preProcessStart = DateTime.now().millisecondsSinceEpoch;
+
+    // Create TensorImage from image
+    TensorImage inputImage = TensorImage.fromImage(image);
+
+    // Pre-process TensorImage
+    inputImage = getProcessedImage(inputImage);
+
+    var preProcessElapsedTime =
+        DateTime.now().millisecondsSinceEpoch - preProcessStart;
+
+    // TensorBuffers for output tensors
+    TensorBuffer outputLocations = TensorBufferFloat(_outputShapes[0]);
+
+    // Inputs object for runForMultipleInputs
+    // Use [TensorImage.buffer] or [TensorBuffer.buffer] to pass by reference
+    List<Object> inputs = [inputImage.buffer];
+
+    // Outputs map
+    Map<int, Object> outputs = {
+      0: outputLocations.buffer,
+    };
+
+    var inferenceTimeStart = DateTime.now().millisecondsSinceEpoch;
+
+    /// Run movenet model
+    _interpreter.runForMultipleInputs(inputs, outputs);
+    List outputParsed = [];
+
+    /// Code below to get the actual value of x coordinates, y coordinates and confidence scores.
+    /// Unpacks the list from the output tensor outputLocations into [x, y and confidence level]
+    List<double> data = outputLocations.getDoubleList();
+    var x, y, c;
+    int TOTAL_ITEMS_IN_SHAPE = 51;
+  }
+
+  /// Reference function from code example.
+  /// Not used in this project.
   /// Runs object detection on the input image
   Map<String, dynamic>? predict(imageLib.Image image) {
     var predictStartTime = DateTime.now().millisecondsSinceEpoch;
